@@ -13,17 +13,21 @@
 
 //==============================================================================
 GabunityDemoAudioProcessor::GabunityDemoAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       )
-#endif
+                       ),
+       vts(*this, nullptr)
 {
+    vts.createAndAddParameter ("cutoff",                        // parameter ID
+                               "Cutoff (Pole Location)",        // parameter name
+                               String(),                        // parameter label (suffix)
+                               NormalisableRange<float> (0.0f, 0.999f),    // range
+                               0.5f,                            // default value
+                               nullptr,
+                               nullptr);
+
+    vts.state = ValueTree (Identifier (JucePlugin_Name));
 }
 
 GabunityDemoAudioProcessor::~GabunityDemoAudioProcessor()
@@ -95,8 +99,7 @@ void GabunityDemoAudioProcessor::changeProgramName (int index, const String& new
 //==============================================================================
 void GabunityDemoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    lastOuts.fill(0.f);
 }
 
 void GabunityDemoAudioProcessor::releaseResources()
@@ -144,29 +147,36 @@ void GabunityDemoAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    const float p = *vts.getRawParameterValue("cutoff");
+    const int len = buffer.getNumSamples();
+
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    for (int channel = 0; channel < jmin(2, totalNumInputChannels); ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
 
-        // ..do something to the data...
+        for (int i = 0; i < len; ++i)
+        {
+            channelData[i] = p * (lastOuts[channel] - channelData[i]) + channelData[i];
+            lastOuts[channel] = channelData[i];
+        }
     }
 }
 
 //==============================================================================
 bool GabunityDemoAudioProcessor::hasEditor() const
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    return false; // (change this to false if you choose to not supply an editor)
 }
 
 AudioProcessorEditor* GabunityDemoAudioProcessor::createEditor()
 {
-    return new GabunityDemoAudioProcessorEditor (*this);
+    return nullptr;
 }
 
 //==============================================================================

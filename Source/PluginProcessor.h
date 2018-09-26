@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <array>
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
@@ -56,6 +57,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    AudioProcessorValueTreeState vts;
+    std::array<float, 2> lastOuts;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GabunityDemoAudioProcessor)
 };
