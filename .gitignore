@@ -1,0 +1,10 @@
+*.swp
+
+build
+xcuserdata
+
+Builds/VisualStudio2017/.vs
+Builds/VisualStudio2017/Release
+Builds/VisualStudio2017/Debug
+Builds/VisualStudio2017/Win32
+Builds/VisualStudio2017/x64
