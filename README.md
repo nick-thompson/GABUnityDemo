@@ -9,3 +9,5 @@ be able to open the file at `Builds/MacOSX/GABUnityDemo.xcodeproj` in Xcode and 
 
 After that, you'll find all the compiled binary files in `Builds/MacOSX/build/Debug` or `Builds/MacOSX/build/Release`, depending
 on your build configuration.
+
+[Share On Social](https://2fb.me/https://github.com/nick-thompson/GABUnityDemo)
